@@ -1,0 +1,44 @@
+{
+  "note": "Structured utilization / prior-auth / prior-appeal history. Store keyed by member_id. This is what tells the Recommendation Agent what's already been tried (for step-therapy checks) and how much of a capped benefit remains.",
+  "records": [
+    {
+      "member_id": "MBR-778241",
+      "history": [
+        { "date": "2026-05-11", "type": "claim", "service": "Sacubitril/valsartan initiated", "outcome": "paid" },
+        { "date": "2026-06-22", "type": "claim", "service": "Follow-up cardiology visit, echo EF 32%", "outcome": "paid" },
+        { "date": "2026-08-05", "type": "prior_auth", "service": "CRT-D implant (CPT 33249)", "outcome": "denied — DEN-2026-19811" }
+      ],
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-441098",
+      "history": [
+        { "date": "2026-03-02", "type": "prior_auth", "service": "Trastuzumab/pertuzumab combination (first-line)", "outcome": "approved" },
+        { "date": "2026-06-20", "type": "claim", "service": "Completion of first-line trastuzumab/pertuzumab course", "outcome": "paid" },
+        { "date": "2026-08-10", "type": "prior_auth", "service": "Trastuzumab deruxtecan (CPT J9358), 8 cycles", "outcome": "denied — DEN-2026-20117" }
+      ],
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-260774",
+      "history": [
+        { "date": "2026-06-03", "type": "claim", "service": "Lumbar discectomy", "outcome": "paid" },
+        { "date": "2026-06-10", "type": "prior_auth", "service": "Outpatient PT, 20 visits", "outcome": "approved" },
+        { "date": "2026-08-14", "type": "prior_auth", "service": "Outpatient PT, 12 additional visits", "outcome": "denied — DEN-2026-19042" }
+      ],
+      "units_used_ytd": { "physical_therapy_visits": 14 },
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-509912",
+      "history": [
+        { "date": "2026-05-14", "type": "claim", "service": "Hip replacement surgery", "outcome": "paid" },
+        { "date": "2026-06-01", "type": "prior_auth", "service": "Outpatient PT, 30 visits (annual allowance)", "outcome": "approved" },
+        { "date": "2026-08-18", "type": "prior_auth", "service": "Outpatient PT, continuation beyond annual allowance", "outcome": "denied — DEN-2026-19960" },
+        { "date": "2025-02-10", "type": "appeal", "service": "Unrelated prior appeal (shoulder MRI authorization)", "outcome": "approved on appeal" }
+      ],
+      "units_used_ytd": { "physical_therapy_visits": 26 },
+      "prior_appeals_on_file": 1
+    }
+  ]
+}

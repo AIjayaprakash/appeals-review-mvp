@@ -1,0 +1,107 @@
+{
+  "note": "Ground-truth fields for validating the Intake Agent's extraction against each test file. All names, IDs, and case numbers are synthetic.",
+  "cases": [
+    {
+      "test_file": "emails/EMAIL-001_typical_with_attachment.eml",
+      "scenario": "Typical, well-formed appeal email with one PDF attachment",
+      "expect_status_after_intake": "Structured",
+      "expected_fields": {
+        "channel": "email",
+        "member_id": "MBR-778241",
+        "member_name": "Eleanor Whitfield",
+        "date_of_birth": "1958-03-14",
+        "case_reference": "APL-2026-00312",
+        "denial_reference": "DEN-2026-19811",
+        "requesting_provider": "Dr. Aisha Kapoor",
+        "sender_org": "Stonebridge Cardiac Care Center",
+        "procedure_requested": "CRT-D implant (CPT 33249)",
+        "attachments": ["clinical_summary_MBR778241.pdf"]
+      },
+      "notes": "Baseline happy-path case. Attachment should be OCR'd and its fields (diagnosis, treatment history) merged into the same case record as the email body fields."
+    },
+    {
+      "test_file": "emails/EMAIL-002_minimal_missing_member_id.eml",
+      "scenario": "Informal, unstructured email from a family member — no member ID, no attachment",
+      "expect_status_after_intake": "Needs Clarification",
+      "expected_fields": {
+        "channel": "email",
+        "member_id": null,
+        "member_name": "Marion Carter",
+        "date_of_birth": null,
+        "case_reference": null,
+        "denial_reference": null,
+        "requesting_provider": null,
+        "sender_org": null,
+        "procedure_requested": "additional physical therapy sessions (post hip surgery)",
+        "attachments": []
+      },
+      "notes": "Tests the Intake Agent's handling of missing required fields. Expected behavior is to extract whatever is present, flag member_id and case_reference as missing, and hold the case at 'Needs Clarification' rather than silently proceeding to summarization. Use this case to validate the flagging logic, not just extraction accuracy."
+    },
+    {
+      "test_file": "emails/EMAIL-003_forwarded_multi_attachment.eml",
+      "scenario": "Forwarded provider-office email, two attachments (PDF case packet + plain-text denial letter)",
+      "expect_status_after_intake": "Structured",
+      "expected_fields": {
+        "channel": "email",
+        "member_id": "MBR-441098",
+        "member_name": "Grace K. Delgado",
+        "case_reference": "APL-2026-00478",
+        "denial_reference": "DEN-2026-20117",
+        "requesting_provider": "Dr. Samuel Torres",
+        "sender_org": "Riverside Oncology Group",
+        "procedure_requested": "trastuzumab deruxtecan (CPT J9358), 8 cycles",
+        "attachments": ["case_packet_MBR441098.pdf", "denial_letter_DEN-2026-20117.txt"]
+      },
+      "notes": "Tests forwarded-thread parsing (the real sender's identity is in the quoted block, not the From header) and multi-attachment, mixed-format handling (PDF + plain text) in one email."
+    },
+    {
+      "test_file": "medical_history/MEDHIST-001_structured_case_record.pdf",
+      "scenario": "Clean, typed, structured clinical record — direct upload",
+      "expect_status_after_intake": "Structured",
+      "expected_fields": {
+        "channel": "upload",
+        "member_id": "MBR-778241",
+        "member_name": "Eleanor R. Whitfield",
+        "date_of_birth": "1958-03-14",
+        "diagnosis_codes": ["I50.22", "I48.91"],
+        "requesting_provider": "Dr. Aisha Kapoor",
+        "case_reference": "APL-2026-00312",
+        "procedure_requested": "CRT-D implant (CPT 33249)"
+      },
+      "notes": "Baseline happy-path upload case — same underlying case as EMAIL-001's attachment, so results should match when the same file arrives via either channel."
+    },
+    {
+      "test_file": "medical_history/MEDHIST-002_appeal_letter_narrative.pdf",
+      "scenario": "Prose-heavy physician appeal letter, no tables, no ICD-10 codes stated explicitly",
+      "expect_status_after_intake": "Structured",
+      "expected_fields": {
+        "channel": "upload",
+        "member_id": null,
+        "member_name": "Marcus T. Oyelaran",
+        "date_of_birth": "1971-02-11",
+        "diagnosis_codes": [],
+        "requesting_provider": "Dr. Wendell Ashe",
+        "case_reference": "DEN-2026-19042",
+        "procedure_requested": "12 additional outpatient physical therapy sessions"
+      },
+      "notes": "Tests extraction from free-text narrative rather than a labeled table — member_id and diagnosis codes are genuinely absent from the source document, so a correct extraction should return null/empty for those rather than guessing."
+    },
+    {
+      "test_file": "medical_history/MEDHIST-003_multipage_labs.pdf",
+      "scenario": "Two-page record with a lab-results table and a page break mid-document",
+      "expect_status_after_intake": "Structured",
+      "expected_fields": {
+        "channel": "upload",
+        "member_id": "MBR-441098",
+        "member_name": "Grace K. Delgado",
+        "date_of_birth": "1966-09-27",
+        "diagnosis_codes": ["C50.911"],
+        "requesting_provider": "Dr. Samuel Torres",
+        "case_reference": "APL-2026-00478",
+        "procedure_requested": "trastuzumab deruxtecan (CPT J9358), 8 cycles",
+        "lab_results_present": true
+      },
+      "notes": "Tests table extraction (7-row lab panel) and correct field association across a page break — the clinical justification and physician signature are on page 2."
+    }
+  ]
+}

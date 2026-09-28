@@ -1,0 +1,55 @@
+{
+  "note": "Structured denial records. Store keyed by denial_reference (primary) and member_id (lookup index). Exact-match table, NOT vector store material.",
+  "records": [
+    {
+      "denial_reference": "DEN-2026-19811",
+      "case_reference": "APL-2026-00312",
+      "member_id": "MBR-778241",
+      "date_denied": "2026-08-05",
+      "denied_service": { "cpt_code": "33249", "description": "CRT-D implant" },
+      "stated_reason": "Insufficient documentation of guideline-directed medical therapy (GDMT) duration prior to device request.",
+      "cited_policy_id": "CP-CARD-009",
+      "reviewer_notes": "Submission did not clearly demonstrate a 90-day GDMT trial prior to the CRT-D request; LVEF and QRS duration were not included in the original submission.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-02-01"
+    },
+    {
+      "denial_reference": "DEN-2026-19042",
+      "case_reference": "DEN-2026-19042",
+      "member_id": null,
+      "member_lookup_hint": { "name": "Marcus T. Oyelaran", "date_of_birth": "1971-02-11" },
+      "date_denied": "2026-08-14",
+      "denied_service": { "cpt_code": "97110", "description": "Outpatient physical therapy — 12 additional sessions" },
+      "stated_reason": "Requested sessions exceed the standard post-operative allowance without evidence of functional necessity for extension.",
+      "cited_policy_id": "CP-PT-002",
+      "reviewer_notes": "Progress notes at time of review did not include objective functional outcome measures (e.g., Oswestry Disability Index) demonstrating continued trajectory toward functional goals.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-02-10"
+    },
+    {
+      "denial_reference": "DEN-2026-20117",
+      "case_reference": "APL-2026-00478",
+      "member_id": "MBR-441098",
+      "date_denied": "2026-08-10",
+      "denied_service": { "cpt_code": "J9358", "description": "Trastuzumab deruxtecan, 8 cycles" },
+      "stated_reason": "Alternative first-line treatment options have not yet been exhausted per plan clinical policy CP-ONC-014.",
+      "cited_policy_id": "CP-ONC-014",
+      "reviewer_notes": "Submission did not include imaging confirmation of disease progression on first-line HER2-directed therapy at time of original review.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-02-06"
+    },
+    {
+      "denial_reference": "DEN-2026-19960",
+      "case_reference": null,
+      "member_id": null,
+      "member_lookup_hint": { "name": "Marion Carter", "date_of_birth": "1949-11-02", "relationship": "dependent on stepfather's plan" },
+      "date_denied": "2026-08-18",
+      "denied_service": { "cpt_code": "97110", "description": "Outpatient physical therapy — continuation post hip replacement" },
+      "stated_reason": "Requested continuation would exceed the plan's annual physical therapy visit allowance absent documented unmet functional goals.",
+      "cited_policy_id": "CP-PT-002",
+      "reviewer_notes": "Member has used 26 of 30 annual PT visit allowance; extension requires a functional-necessity override per CP-PT-002 section 3.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-02-14"
+    }
+  ]
+}

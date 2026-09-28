@@ -1,0 +1,76 @@
+{
+  "note": "Structured eligibility & benefit records. Store keyed by member_id where known. Two records here have no member_id in the source intake — see member_lookup_hint; resolving these requires a name+DOB fuzzy match step before eligibility can be confirmed.",
+  "records": [
+    {
+      "member_id": "MBR-778241",
+      "member_name": "Eleanor R. Whitfield",
+      "date_of_birth": "1958-03-14",
+      "plan_name": "Empire Advantage PPO",
+      "plan_status": "active",
+      "effective_date": "2024-01-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Cardiac device implantation",
+        "requires_prior_auth": true,
+        "step_therapy_required": "90-day guideline-directed medical therapy (GDMT) trial",
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
+    },
+    {
+      "member_id": "MBR-441098",
+      "member_name": "Grace K. Delgado",
+      "date_of_birth": "1966-09-27",
+      "plan_name": "Empire Advantage HMO",
+      "plan_status": "active",
+      "effective_date": "2023-04-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Specialty oncology infusion drugs",
+        "requires_prior_auth": true,
+        "step_therapy_required": "1 prior HER2-directed regimen with documented progression",
+        "formulary_tier": "Tier 3 — specialty",
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
+    },
+    {
+      "member_id": "MBR-260774",
+      "member_name": "Marcus T. Oyelaran",
+      "date_of_birth": "1971-02-11",
+      "plan_name": "Hartwell Community EPO",
+      "plan_status": "active",
+      "effective_date": "2025-01-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Outpatient physical therapy",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "annual_limit": 20,
+        "units_used_ytd": 14,
+        "unit": "visits"
+      },
+      "resolution_note": "member_id not present in the source appeal letter (MEDHIST-002) — resolved here via name + date_of_birth match. The intake pipeline must perform this same resolution before eligibility can be confirmed."
+    },
+    {
+      "member_id": "MBR-509912",
+      "member_name": "Marion Carter",
+      "date_of_birth": "1949-11-02",
+      "plan_name": "Lakeside Regional PPO",
+      "plan_status": "active",
+      "effective_date": "2022-07-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Outpatient physical therapy",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "annual_limit": 30,
+        "units_used_ytd": 26,
+        "unit": "visits"
+      },
+      "resolution_note": "member_id, DOB, and plan are entirely absent from the source email (EMAIL-002) — it only names a caregiver, a first name, and 'my stepdad's work plan'. This record cannot be resolved from the email alone; it is included to show what the agent *should* find once a member_id is supplied, not what it can find today. This case should route to Needs Clarification, not attempt a fuzzy match on 'Marion' + hip surgery alone."
+    }
+  ]
+}

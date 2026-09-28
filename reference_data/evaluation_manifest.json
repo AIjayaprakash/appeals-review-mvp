@@ -1,0 +1,67 @@
+{
+  "note": "For each intake test file, the reference-data lookups the Recommendation Agent should perform, and whether those lookups should succeed. Use this to validate cross-referencing, not just extraction — expected_extraction.json (in the intake-test-data package) covers extraction; this covers evaluation.",
+  "cases": [
+    {
+      "test_file": "emails/EMAIL-001_typical_with_attachment.eml (+ MEDHIST-001 attachment)",
+      "member_id": "MBR-778241",
+      "lookups": {
+        "denial": { "found": true, "key": "DEN-2026-19811" },
+        "eligibility_benefits": { "found": true, "key": "MBR-778241" },
+        "utilization_history": { "found": true, "key": "MBR-778241" },
+        "policy_bulletin": { "found": true, "key": "CP-CARD-009" }
+      },
+      "evaluation_signal": "Appeal submits GDMT trial record (sacubitril/valsartan from 2026-05-11, documented through 2026-08-05 — meets the 90-day window). Denial cited exactly this gap. Recommendation should lean toward 'meets criteria, forward for approval' — but LVEF/QRS documentation should still be checked against CP-CARD-009 criteria 1 and 3 before a final decision.",
+      "notes": "Primary happy-path case for the full evaluation chain: denial reason → policy criterion → utilization evidence, all resolving cleanly."
+    },
+    {
+      "test_file": "emails/EMAIL-002_minimal_missing_member_id.eml",
+      "member_id": null,
+      "lookups": {
+        "denial": { "found": false, "reason": "no denial_reference or member_id in source email to key a lookup" },
+        "eligibility_benefits": { "found": false, "reason": "insufficient identity data — 'Marion' + hip surgery is not enough to safely match MBR-509912" },
+        "utilization_history": { "found": false, "reason": "same as above" },
+        "policy_bulletin": { "found": false, "reason": "cannot select a policy without a confirmed service/CPT code" }
+      },
+      "evaluation_signal": "No evaluation is possible. Case must stay at 'Needs Clarification' — this is the primary negative-path test in the set.",
+      "notes": "Deliberately unresolvable. A real system likely does hold a matching record (see MBR-509912 in eligibility_benefits.json / DEN-2026-19960 in denials.json) — the test is whether the pipeline resists the temptation to fuzzy-match on first name alone and instead asks the requester for a member ID or DOB."
+    },
+    {
+      "test_file": "emails/EMAIL-003_forwarded_multi_attachment.eml (+ MEDHIST-003 attachment)",
+      "member_id": "MBR-441098",
+      "lookups": {
+        "denial": { "found": true, "key": "DEN-2026-20117" },
+        "eligibility_benefits": { "found": true, "key": "MBR-441098" },
+        "utilization_history": { "found": true, "key": "MBR-441098" },
+        "policy_bulletin": { "found": true, "key": "CP-ONC-014" }
+      },
+      "evaluation_signal": "Denial cited unexhausted first-line options; utilization history shows first-line trastuzumab/pertuzumab was completed 2026-06-20, and MEDHIST-003 documents imaging-confirmed progression on 2026-06-28. This directly satisfies CP-ONC-014 criterion 2. Cardiac function (EF 58%) satisfies criterion 3. Recommendation should lean toward 'meets criteria, denial reason does not hold up on appeal.'",
+      "notes": "Tests whether the agent correctly identifies that the denial's stated reason is contradicted by the member's own utilization history — the denial letter attached in EMAIL-003 makes the original reasoning explicit, which is a useful check against the agent's own conclusion."
+    },
+    {
+      "test_file": "medical_history/MEDHIST-001_structured_case_record.pdf",
+      "member_id": "MBR-778241",
+      "lookups": "same as EMAIL-001 above — same underlying case, different channel",
+      "evaluation_signal": "Should match EMAIL-001's evaluation_signal exactly. Useful cross-channel consistency check.",
+      "notes": null
+    },
+    {
+      "test_file": "medical_history/MEDHIST-002_appeal_letter_narrative.pdf",
+      "member_id": null,
+      "lookups": {
+        "denial": { "found": true, "key": "DEN-2026-19042", "resolved_via": "name + DOB match (Marcus T. Oyelaran, 1971-02-11), not member_id" },
+        "eligibility_benefits": { "found": true, "key": "MBR-260774", "resolved_via": "same name + DOB match" },
+        "utilization_history": { "found": true, "key": "MBR-260774" },
+        "policy_bulletin": { "found": true, "key": "CP-PT-002" }
+      },
+      "evaluation_signal": "Utilization shows 14 of 20 annual visits used; the requested 12 additional would bring the total to 26 — 6 over the annual allowance, requiring a Section 3 extension justification. The appeal letter cites an Oswestry score improving from 58% to 34% (a valid objective functional outcome measure per Section 3.1) but does not state a specific bounded functional goal or expected discharge point (Section 3.2/3.3 gap). Recommendation should flag this as a partial match — likely 'needs additional documentation' rather than a clean approve or deny.",
+      "notes": "Best case in the set for testing nuanced, partial-criteria-met reasoning rather than a binary approve/deny. Also the second case (after EMAIL-002) that requires identity resolution before any lookup succeeds — here the letter provides enough (full name + DOB) for that resolution to work, unlike EMAIL-002."
+    },
+    {
+      "test_file": "medical_history/MEDHIST-003_multipage_labs.pdf",
+      "member_id": "MBR-441098",
+      "lookups": "same as EMAIL-003 above — same underlying case, different channel",
+      "evaluation_signal": "Should match EMAIL-003's evaluation_signal exactly.",
+      "notes": null
+    }
+  ]
+}
