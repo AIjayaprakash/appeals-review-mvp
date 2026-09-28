@@ -83,3 +83,13 @@ def get_case(conn: psycopg.Connection, case_id: str) -> Case | None:
     if row is None:
         return None
     return Case.model_validate(row[0])
+
+
+def list_cases(conn: psycopg.Connection, status: str | None = None) -> list[Case]:
+    if status is not None:
+        rows = conn.execute(
+            "SELECT data FROM cases WHERE status = %s ORDER BY updated_at DESC", (status,)
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT data FROM cases ORDER BY updated_at DESC").fetchall()
+    return [Case.model_validate(row[0]) for row in rows]

@@ -50,6 +50,24 @@ def _mock_llm_response(expected_fields: dict) -> dict:
     return result
 
 
+# The endpoint-level tests below (unlike the build_case-level ones above) run the
+# full compiled graph (app/core/graph.py), which is what /intake/upload and
+# /intake/email/poll invoke as of Phase 4. Whether checks 1-7 proceed to check 8
+# depends on real reference_data lookups, so evaluation_agent and
+# summarization_agent are mocked too -- these tests are still about pipeline
+# plumbing (does it reach a terminal status, are extracted fields carried
+# through), not about exact scenario outcomes, which test_graph.py covers with
+# scenario_manifest.json fixtures.
+_MOCK_EVALUATION_RESULT = {
+    "decision": "Approve",
+    "scenario": 1,
+    "overall_rationale": "Mocked evaluation result for pipeline plumbing test.",
+    "cited_guidelines": ["MOCK-POLICY#c1"],
+}
+_MOCK_SUMMARY = "Mocked clinical summary for pipeline plumbing test."
+_TERMINAL_STATUSES = {"Drafted", "Needs Clarification"}
+
+
 def test_email_001_matches_expected_extraction():
     expected = _load_expected("emails/EMAIL-001_typical_with_attachment.eml")
     fields = expected["expected_fields"]
@@ -107,7 +125,11 @@ def test_medhist_001_via_upload_endpoint():
     fields = expected["expected_fields"]
     pdf_bytes = (TEST_DATA_DIR / "medical_history" / "MEDHIST-001_structured_case_record.pdf").read_bytes()
 
-    with patch("app.api.intake.intake_agent", return_value=_mock_llm_response(fields)):
+    with (
+        patch("app.core.graph.intake_agent", return_value=_mock_llm_response(fields)),
+        patch("app.core.graph.evaluation_agent", return_value=_MOCK_EVALUATION_RESULT),
+        patch("app.core.graph.summarization_agent", return_value=_MOCK_SUMMARY),
+    ):
         response = client.post(
             "/intake/upload",
             files={"file": ("MEDHIST-001_structured_case_record.pdf", pdf_bytes, "application/pdf")},
@@ -115,7 +137,7 @@ def test_medhist_001_via_upload_endpoint():
 
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "Structured"
+    assert body["status"] in _TERMINAL_STATUSES
     assert body["channel"] == "upload"
     assert body["member"]["member_id"] == fields["member_id"]
     assert body["diagnosis_codes"] == fields["diagnosis_codes"]
@@ -127,7 +149,11 @@ def test_medhist_002_via_upload_endpoint_is_structured_via_name_dob():
     assert expected["expect_status_after_intake"] == "Structured"
     pdf_bytes = (TEST_DATA_DIR / "medical_history" / "MEDHIST-002_appeal_letter_narrative.pdf").read_bytes()
 
-    with patch("app.api.intake.intake_agent", return_value=_mock_llm_response(fields)):
+    with (
+        patch("app.core.graph.intake_agent", return_value=_mock_llm_response(fields)),
+        patch("app.core.graph.evaluation_agent", return_value=_MOCK_EVALUATION_RESULT),
+        patch("app.core.graph.summarization_agent", return_value=_MOCK_SUMMARY),
+    ):
         response = client.post(
             "/intake/upload",
             files={"file": ("MEDHIST-002_appeal_letter_narrative.pdf", pdf_bytes, "application/pdf")},
@@ -135,12 +161,13 @@ def test_medhist_002_via_upload_endpoint_is_structured_via_name_dob():
 
     assert response.status_code == 200
     body = response.json()
-    # member_id is genuinely absent from this letter -- Structured here rests on
-    # the full name + DOB fallback, not a member_id.
+    # member_id is genuinely absent from this letter -- intake's Structured status
+    # (see the audit trail) rests on the full name + DOB fallback, not a member_id.
     assert body["member"]["member_id"] is None
     assert body["member"]["name"] == fields["member_name"]
     assert body["member"]["date_of_birth"] == fields["date_of_birth"]
-    assert body["status"] == "Structured"
+    assert body["status"] in _TERMINAL_STATUSES
+    assert body["audit_trail"][0]["action"].startswith("Extracted intake fields")
 
 
 def test_medhist_003_via_upload_endpoint():
@@ -148,7 +175,11 @@ def test_medhist_003_via_upload_endpoint():
     fields = expected["expected_fields"]
     pdf_bytes = (TEST_DATA_DIR / "medical_history" / "MEDHIST-003_multipage_labs.pdf").read_bytes()
 
-    with patch("app.api.intake.intake_agent", return_value=_mock_llm_response(fields)):
+    with (
+        patch("app.core.graph.intake_agent", return_value=_mock_llm_response(fields)),
+        patch("app.core.graph.evaluation_agent", return_value=_MOCK_EVALUATION_RESULT),
+        patch("app.core.graph.summarization_agent", return_value=_MOCK_SUMMARY),
+    ):
         response = client.post(
             "/intake/upload",
             files={"file": ("MEDHIST-003_multipage_labs.pdf", pdf_bytes, "application/pdf")},
@@ -156,7 +187,7 @@ def test_medhist_003_via_upload_endpoint():
 
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "Structured"
+    assert body["status"] in _TERMINAL_STATUSES
     assert body["member"]["member_id"] == fields["member_id"]
     assert body["diagnosis_codes"] == fields["diagnosis_codes"]
 
@@ -166,7 +197,11 @@ def test_poll_email_endpoint_returns_one_case_per_mailbox_file():
 
     expected_count = len(list_test_mailbox())
 
-    with patch("app.api.intake.intake_agent", return_value=_mock_llm_response({})):
+    with (
+        patch("app.core.graph.intake_agent", return_value=_mock_llm_response({})),
+        patch("app.core.graph.evaluation_agent", return_value=_MOCK_EVALUATION_RESULT),
+        patch("app.core.graph.summarization_agent", return_value=_MOCK_SUMMARY),
+    ):
         response = client.post("/intake/email/poll")
 
     assert response.status_code == 200
@@ -174,7 +209,7 @@ def test_poll_email_endpoint_returns_one_case_per_mailbox_file():
     assert len(cases) == expected_count
     for case in cases:
         assert case["channel"] == "email"
-        assert case["status"] in {"Structured", "Needs Clarification"}
+        assert case["status"] in _TERMINAL_STATUSES
 
 
 def test_uploaded_case_is_readable_via_get_cases_endpoint():
@@ -182,7 +217,11 @@ def test_uploaded_case_is_readable_via_get_cases_endpoint():
     fields = expected["expected_fields"]
     pdf_bytes = (TEST_DATA_DIR / "medical_history" / "MEDHIST-001_structured_case_record.pdf").read_bytes()
 
-    with patch("app.api.intake.intake_agent", return_value=_mock_llm_response(fields)):
+    with (
+        patch("app.core.graph.intake_agent", return_value=_mock_llm_response(fields)),
+        patch("app.core.graph.evaluation_agent", return_value=_MOCK_EVALUATION_RESULT),
+        patch("app.core.graph.summarization_agent", return_value=_MOCK_SUMMARY),
+    ):
         upload_response = client.post(
             "/intake/upload",
             files={"file": ("MEDHIST-001_structured_case_record.pdf", pdf_bytes, "application/pdf")},

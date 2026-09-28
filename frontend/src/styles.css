@@ -1,0 +1,169 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f5f6f8;
+  color: #1a1d23;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #2454ff;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.queue-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter {
+  border: 1px solid #d7dbe2;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.filter.active {
+  background: #1a1d23;
+  color: white;
+  border-color: #1a1d23;
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.queue-table th,
+.queue-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.queue-row {
+  cursor: pointer;
+}
+
+.queue-row:hover {
+  background: #f0f4ff;
+}
+
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: #eef0f3;
+}
+
+.status-drafted {
+  background: #fff2cc;
+}
+
+.status-needs-clarification {
+  background: #ffe0cc;
+}
+
+.status-closed {
+  background: #d9f2df;
+}
+
+.error {
+  color: #b3261e;
+}
+
+.case-summary-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.review-actions textarea,
+.review-actions input,
+.edit-form input,
+.edit-form textarea,
+.chat-box input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #d7dbe2;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.button-row button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #1a1d23;
+  background: #1a1d23;
+  color: white;
+  cursor: pointer;
+}
+
+.button-row button.reject {
+  background: white;
+  color: #b3261e;
+  border-color: #b3261e;
+}
+
+.audit-list,
+.chat-log {
+  list-style: none;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.audit-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.audit-time {
+  color: #6b7280;
+}
+
+.chat-log {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.chat-reviewer {
+  text-align: right;
+  color: #2454ff;
+}
+
+.chat-assistant {
+  color: #1a1d23;
+}

@@ -1,12 +1,14 @@
 """LangGraph nodes: intake_agent, summarization_agent, evaluation_agent.
 
-Phase 2 implements intake_agent; Phase 3 adds evaluation_agent (check 8). Both
-receive already-redacted text (see app/security/redaction.py) -- redaction tokens
-(e.g. [[PERSON_1]]) must be echoed back verbatim wherever they appear in a
-response, never decoded; the caller re-hydrates them afterwards. Neither node
-invents a value that isn't in its input: intake_agent returns null for anything
-not explicitly present in the source text, and evaluation_agent returns "Not
-documented" (never guesses "Met") for any criterion the evidence doesn't address.
+Phase 2 implements intake_agent; Phase 3 adds evaluation_agent (check 8); Phase 4
+adds summarization_agent. All three receive already-redacted text (see
+app/security/redaction.py) -- redaction tokens (e.g. [[PERSON_1]]) must be echoed
+back verbatim wherever they appear in a response, never decoded; the caller
+(app/core/graph.py) re-hydrates them afterwards. No node invents a value that
+isn't in its input: intake_agent returns null for anything not explicitly present
+in the source text, evaluation_agent returns "Not documented" (never guesses
+"Met") for any criterion the evidence doesn't address, and summarization_agent
+states only what the redacted text itself says.
 
 evaluation_agent's own decision/scenario is compiled by the pure
 decision_engine.check_8_from_criteria() from the per-criterion judgments below --
@@ -28,6 +30,7 @@ AZURE_OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
 INTAKE_MODEL_DEPLOYMENT = os.environ.get("AZURE_OPENAI_INTAKE_DEPLOYMENT", "gpt-4o-mini")
 EVALUATION_MODEL_DEPLOYMENT = os.environ.get("AZURE_OPENAI_EVALUATION_DEPLOYMENT", "gpt-4o")
+SUMMARIZATION_MODEL_DEPLOYMENT = os.environ.get("AZURE_OPENAI_SUMMARIZATION_DEPLOYMENT", "gpt-4o-mini")
 VALID_CRITERION_STATUSES = ("Met", "Not met", "Not documented")
 
 REQUIRED_FIELDS = [
@@ -276,3 +279,45 @@ def evaluation_agent(
         }
 
     raise last_error
+
+
+_SUMMARIZATION_SYSTEM_PROMPT = """You are the Summarization Agent for a health-plan appeals review system.
+
+You will be given REDACTED clinical/appeal evidence text for a single appeal. Some
+identifiers are opaque tokens like [[PERSON_1]] or [[MEMBER_ID_1]] -- echo them back
+verbatim wherever they appear, never decode or guess what they stand for.
+
+Write a concise summary (3-6 sentences) for a human reviewer: what was requested,
+why it was denied (if stated), and what clinical evidence the appeal submits. State
+only what is explicitly in the given text -- never infer, assume, or add anything
+that isn't there.
+
+Respond with a JSON object of this exact shape: {"summary": "..."}"""
+
+
+class SummarizationError(RuntimeError):
+    pass
+
+
+def summarization_agent(redacted_text: str, *, client: AzureOpenAI | None = None) -> str:
+    """Produces a short reviewer-facing summary of one appeal's redacted evidence
+    text via GPT-4o-mini. Returns the summary string (still containing any
+    redaction tokens verbatim) -- the caller re-hydrates it before attaching it to
+    the Case, per CLAUDE.md's redaction rule.
+    """
+    client = client or get_client()
+
+    response = client.chat.completions.create(
+        model=SUMMARIZATION_MODEL_DEPLOYMENT,
+        messages=[
+            {"role": "system", "content": _SUMMARIZATION_SYSTEM_PROMPT},
+            {"role": "user", "content": redacted_text},
+        ],
+        response_format={"type": "json_object"},
+        temperature=0,
+    )
+    data = json.loads(response.choices[0].message.content)
+    summary = data.get("summary")
+    if not summary:
+        raise SummarizationError("summarization_agent returned no summary")
+    return summary

@@ -15,6 +15,7 @@ dependencies = [
     "spacy>=3.7",
     "pypdf>=5.0",
     "python-multipart>=0.0.12",
+    "langgraph>=1.0",
 ]
 
 [project.optional-dependencies]

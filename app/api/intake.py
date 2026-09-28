@@ -1,23 +1,30 @@
 """POST /intake/upload, POST /intake/email/poll.
 
-Orchestrates ingestion -> redaction -> intake_agent -> re-hydration -> Case
-construction and persistence. Phase 4's compiled LangGraph (app/core/graph.py) will
-replace this manual pipeline; for now both endpoints run the same sequence directly.
+build_case() is the intake-only slice (ingestion -> redaction -> intake_agent ->
+re-hydration -> Case fields, no lookups or decisioning) and stays covered
+directly by tests/test_intake_api.py's build_case-level tests. The endpoints
+below instead run a Case through the full compiled LangGraph
+(app/core/graph.py: intake -> lookup -> rules_engine -> (evaluation_agent) ->
+finalize) so an uploaded or polled case comes back with a status past Structured
+whenever there's enough to look up -- Structured/Needs Clarification is only
+graph.py's intake step, not the pipeline's end state, as of Phase 4.
 
 test_data/emails/ stands in for a live mailbox -- see app/services/email_connector.py.
 Each poll reprocesses every .eml file and opens a new case per message; a real
 appeal referencing an already-open case is exactly what check 2 (Scenario 9,
-duplicate/merge) exists to catch downstream, not something intake itself dedupes.
+duplicate/merge) exists to catch, via the graph's lookup step.
 """
 
 from __future__ import annotations
 
 import uuid
 from datetime import date
+from email.utils import parsedate_to_datetime
 
 from fastapi import APIRouter, UploadFile
 
 from app import db
+from app.core import graph as pipeline_graph
 from app.core.nodes import intake_agent
 from app.models import Case, CaseStatus, Channel, Document, Member, Provider, Request
 from app.security.redaction import redact, rehydrate
@@ -36,6 +43,15 @@ def _parse_date(value: str | None) -> date | None:
     try:
         return date.fromisoformat(value)
     except ValueError:
+        return None
+
+
+def _parse_email_received_date(date_header: str) -> date | None:
+    if not date_header:
+        return None
+    try:
+        return parsedate_to_datetime(date_header).date()
+    except (TypeError, ValueError):
         return None
 
 
@@ -102,7 +118,8 @@ async def upload_case(file: UploadFile) -> Case:
         storage_path=f"uploads/{case_id}/{file.filename}",
         ocr_text=text,
     )
-    case = build_case(case_id, Channel.UPLOAD, text, [document])
+    case = Case(case_id=case_id, channel=Channel.UPLOAD, documents=[document])
+    case = pipeline_graph.run_pipeline(case, text, received_date=date.today())
 
     conn = db.get_connection()
     try:
@@ -137,7 +154,9 @@ def poll_email() -> list[Case]:
                 )
 
             case_id = _new_case_id()
-            case = build_case(case_id, Channel.EMAIL, "\n\n".join(working_text_parts), documents)
+            case = Case(case_id=case_id, channel=Channel.EMAIL, documents=documents)
+            received_date = _parse_email_received_date(parsed.date) or date.today()
+            case = pipeline_graph.run_pipeline(case, "\n\n".join(working_text_parts), received_date=received_date)
             db.create_case(conn, case)
             cases.append(case)
     finally:
