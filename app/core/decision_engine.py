@@ -4,6 +4,12 @@ database access. Every fact these checks need (identity resolution, denial /
 eligibility / utilization records, any open-case duplicate match) must already have
 been fetched by app/services/lookup_service.py before evaluate() is called.
 
+check_8_from_criteria() below is check 8's compiler: it turns the Evaluation Agent's
+per-criterion Met / Not met / Not documented judgments (app/core/nodes.py --
+evaluation_agent, the one place check 8 calls an LLM) into the same outcome/scenario
+shape checks 1-7 produce. It is itself pure -- it only reads labels the LLM already
+produced, never calls one -- so it belongs here rather than in nodes.py.
+
 Outcome strings match CLAUDE.md's decision order exactly, not the shorter labels in
 docs/scenarios-operational-plan.pdf.
 """
@@ -51,6 +57,14 @@ class DecisionResult:
     triggering_check: int
     reason: str
     missing_items: list[str] = field(default_factory=list)
+
+
+@dataclass
+class CriterionResult:
+    """One numbered clinical policy criterion, as judged by the Evaluation Agent."""
+
+    number: int
+    status: str  # "Met" | "Not met" | "Not documented"
 
 
 def evaluate(
@@ -267,4 +281,41 @@ def _check_7_within_annual_limit(facts: AppealFacts, eligibility: dict | None) -
             "documented, but not all of it."
         ),
         missing_items=missing,
+    )
+
+
+def check_8_from_criteria(criteria: list[CriterionResult]) -> DecisionResult:
+    """Compiles check 8's outcome from the Evaluation Agent's per-criterion
+    judgments, per CLAUDE.md: any criterion clearly not met -> Deny (Scenario 2);
+    otherwise any criterion not documented -> Needs more information (Scenario 7);
+    all met -> Approve (Scenario 1). A single Not met is conclusive even alongside
+    Not documented criteria -- an outright clinical mismatch isn't fixed by
+    supplying the missing documentation for something else.
+    """
+    not_met = [c for c in criteria if c.status == "Not met"]
+    if not_met:
+        numbers = ", ".join(str(c.number) for c in not_met)
+        return DecisionResult(
+            outcome="Deny",
+            scenario=2,
+            triggering_check=8,
+            reason=f"Clinical policy criterion/criteria {numbers} are not met by the submitted evidence.",
+        )
+
+    not_documented = [c for c in criteria if c.status == "Not documented"]
+    if not_documented:
+        numbers = ", ".join(str(c.number) for c in not_documented)
+        return DecisionResult(
+            outcome="Needs more information",
+            scenario=7,
+            triggering_check=8,
+            reason=f"Clinical policy criterion/criteria {numbers} are not addressed by the submitted evidence.",
+            missing_items=[f"criterion {c.number}" for c in not_documented],
+        )
+
+    return DecisionResult(
+        outcome="Approve",
+        scenario=1,
+        triggering_check=8,
+        reason="All clinical policy criteria are met by the submitted evidence.",
     )
