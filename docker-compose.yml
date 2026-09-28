@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: appeals
+      POSTGRES_PASSWORD: appeals
+      POSTGRES_DB: appeals
+    ports:
+      - "5433:5432"  # 5432 host-side conflicts with a native Postgres install; container still uses 5432 internally
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+volumes:
+  postgres_data:
+  chroma_data:
