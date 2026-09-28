@@ -71,10 +71,36 @@ def _is_pdf(filename: str, content_type: str | None) -> bool:
     return (content_type or "") == "application/pdf" or filename.lower().endswith(".pdf")
 
 
+def _is_eml(filename: str, content_type: str | None) -> bool:
+    return (content_type or "") == "message/rfc822" or filename.lower().endswith(".eml")
+
+
 def _extract_document_text(filename: str, content_type: str | None, content: bytes) -> str:
     if _is_pdf(filename, content_type):
         return ocr_service.extract_text_from_pdf(content)
     return content.decode("utf-8", errors="replace")
+
+
+def _build_email_case_input(raw_bytes: bytes, storage_prefix: str) -> tuple[str, list[Document], str | None]:
+    """Parses an .eml payload into the same (working_text, documents) shape
+    upload_case() and poll_email() both need -- attachments get OCR'd/decoded and
+    attached as Documents, same as a PDF uploaded directly. Returns the email's own
+    Date header too, so the caller can use it as the case's received_date."""
+    parsed = email_connector.parse_eml(raw_bytes)
+    working_text_parts = [parsed.body_text]
+    documents: list[Document] = []
+    for attachment in parsed.attachments:
+        attachment_text = _extract_document_text(attachment.filename, attachment.content_type, attachment.content)
+        working_text_parts.append(attachment_text)
+        documents.append(
+            Document(
+                filename=attachment.filename,
+                source="email",
+                storage_path=f"{storage_prefix}/{attachment.filename}",
+                ocr_text=attachment_text,
+            )
+        )
+    return "\n\n".join(working_text_parts), documents, parsed.date
 
 
 def build_case(case_id: str, channel: Channel, working_text: str, documents: list[Document]) -> Case:
@@ -109,17 +135,22 @@ def build_case(case_id: str, channel: Channel, working_text: str, documents: lis
 async def upload_case(file: UploadFile) -> Case:
     content = await file.read()
     filename = file.filename or "upload"
-    text = _extract_document_text(filename, file.content_type, content)
-
     case_id = _new_case_id()
-    document = Document(
-        filename=filename,
-        source="upload",
-        storage_path=f"uploads/{case_id}/{file.filename}",
-        ocr_text=text,
-    )
-    case = Case(case_id=case_id, channel=Channel.UPLOAD, documents=[document])
-    case = pipeline_graph.run_pipeline(case, text, received_date=date.today())
+
+    if _is_eml(filename, file.content_type):
+        working_text, documents, date_header = _build_email_case_input(content, f"uploads/{case_id}")
+        channel = Channel.EMAIL
+        received_date = _parse_email_received_date(date_header) or date.today()
+    else:
+        working_text = _extract_document_text(filename, file.content_type, content)
+        documents = [
+            Document(filename=filename, source="upload", storage_path=f"uploads/{case_id}/{filename}", ocr_text=working_text)
+        ]
+        channel = Channel.UPLOAD
+        received_date = date.today()
+
+    case = Case(case_id=case_id, channel=channel, documents=documents)
+    case = pipeline_graph.run_pipeline(case, working_text, received_date=received_date)
 
     conn = db.get_connection()
     try:
@@ -135,28 +166,14 @@ def poll_email() -> list[Case]:
     conn = db.get_connection()
     try:
         for eml_path in email_connector.list_test_mailbox():
-            parsed = email_connector.parse_eml(eml_path.read_bytes())
-
-            documents: list[Document] = []
-            working_text_parts = [parsed.body_text]
-            for attachment in parsed.attachments:
-                attachment_text = _extract_document_text(
-                    attachment.filename, attachment.content_type, attachment.content
-                )
-                working_text_parts.append(attachment_text)
-                documents.append(
-                    Document(
-                        filename=attachment.filename,
-                        source="email",
-                        storage_path=f"emails/{eml_path.name}/{attachment.filename}",
-                        ocr_text=attachment_text,
-                    )
-                )
-
             case_id = _new_case_id()
+            working_text, documents, date_header = _build_email_case_input(
+                eml_path.read_bytes(), f"emails/{eml_path.name}"
+            )
+            received_date = _parse_email_received_date(date_header) or date.today()
+
             case = Case(case_id=case_id, channel=Channel.EMAIL, documents=documents)
-            received_date = _parse_email_received_date(parsed.date) or date.today()
-            case = pipeline_graph.run_pipeline(case, "\n\n".join(working_text_parts), received_date=received_date)
+            case = pipeline_graph.run_pipeline(case, working_text, received_date=received_date)
             db.create_case(conn, case)
             cases.append(case)
     finally:

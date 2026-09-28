@@ -192,6 +192,35 @@ def test_medhist_003_via_upload_endpoint():
     assert body["diagnosis_codes"] == fields["diagnosis_codes"]
 
 
+def test_email_001_via_upload_endpoint_is_parsed_not_raw_dumped():
+    """Uploading an .eml directly (the browse-and-upload path, as opposed to
+    /intake/email/poll's test-mailbox path) must go through email_connector.parse_eml
+    -- same as poll_email() -- rather than falling through to the plain-text decode
+    branch, which would hand the LLM raw MIME headers/boundaries and never surface
+    the PDF attachment's own text at all."""
+    expected = _load_expected("emails/EMAIL-001_typical_with_attachment.eml")
+    fields = expected["expected_fields"]
+    eml_bytes = (TEST_DATA_DIR / "emails" / "EMAIL-001_typical_with_attachment.eml").read_bytes()
+
+    with (
+        patch("app.core.graph.intake_agent", return_value=_mock_llm_response(fields)),
+        patch("app.core.graph.evaluation_agent", return_value=_MOCK_EVALUATION_RESULT),
+        patch("app.core.graph.summarization_agent", return_value=_MOCK_SUMMARY),
+    ):
+        response = client.post(
+            "/intake/upload",
+            files={"file": ("EMAIL-001_typical_with_attachment.eml", eml_bytes, "message/rfc822")},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["channel"] == "email"
+    assert body["status"] in _TERMINAL_STATUSES
+    assert body["member"]["member_id"] == fields["member_id"]
+    assert body["request"]["denial_reference"] == fields["denial_reference"]
+    assert [d["filename"] for d in body["documents"]] == fields["attachments"]
+
+
 def test_poll_email_endpoint_returns_one_case_per_mailbox_file():
     from app.services.email_connector import list_test_mailbox
 

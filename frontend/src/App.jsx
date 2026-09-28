@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CaseQueue from "./components/CaseQueue.jsx";
 import CaseDetail from "./components/CaseDetail.jsx";
+import UploadCase from "./components/UploadCase.jsx";
 
 export default function App() {
   const [selectedCaseId, setSelectedCaseId] = useState(null);
@@ -26,7 +27,15 @@ export default function App() {
           }}
         />
       ) : (
-        <CaseQueue key={refreshKey} onSelectCase={setSelectedCaseId} />
+        <>
+          <UploadCase
+            onUploaded={(created) => {
+              setRefreshKey((k) => k + 1);
+              setSelectedCaseId(created.case_id);
+            }}
+          />
+          <CaseQueue key={refreshKey} onSelectCase={setSelectedCaseId} />
+        </>
       )}
     </div>
   );

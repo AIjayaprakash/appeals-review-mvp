@@ -44,6 +44,18 @@ REQUIRED_FIELDS = [
     "procedure_requested",
 ]
 ARRAY_FIELDS = ["diagnosis_codes", "attachments"]
+# Feeds app.core.decision_engine.AppealFacts (checks 4, 6, 7) -- these are the only
+# other fields checks 1-7 need beyond identity/reference data, and, like every other
+# intake field, are never guessed: absent from the source text means null/false/not
+# present in supporting_evidence, never an inferred value.
+OPTIONAL_FIELDS = ["requested_units", "good_cause_for_late_filing", "supporting_evidence"]
+SUPPORTING_EVIDENCE_KEYS = (
+    "functional_outcome_measure",
+    "bounded_goal_stated",
+    "visit_estimate_provided",
+    "no_adherence_gap",
+    "visual_field_obstruction_pct",
+)
 
 _SYSTEM_PROMPT = """You are the Intake Agent for a health-plan appeals review system.
 
@@ -70,7 +82,27 @@ Extract exactly these fields as a JSON object:
 - attachments (array of filenames, [] if none)
 
 If a field is not explicitly present in the text, return null for it (or [] for
-the two array fields). Never guess or infer a value that is not stated."""
+the two array fields). Never guess or infer a value that is not stated.
+
+Also extract, when explicitly stated:
+- requested_units (integer or null): the number of additional units/visits/sessions
+  this appeal is asking for (e.g. "12 additional PT sessions" -> 12). Null if no
+  specific count is stated.
+- good_cause_for_late_filing (boolean): true only if the text gives a specific
+  reason for filing after the normal deadline (e.g. hospitalization, mail delay).
+  False if no such reason is stated -- do not infer good cause from the appeal's
+  clinical merits.
+- supporting_evidence (object): only these keys, each true/a number only if the
+  text explicitly documents it, otherwise false/null -- never infer:
+  - functional_outcome_measure (boolean): a validated functional outcome measure
+    (e.g. Oswestry Disability Index, FOTO) showing an improvement trend is cited.
+  - bounded_goal_stated (boolean): a specific, time-bound functional goal is stated.
+  - visit_estimate_provided (boolean): a therapist estimate of the additional visit
+    count needed, with an expected discharge date, is stated.
+  - no_adherence_gap (boolean): the text confirms the extension isn't attributable
+    to a prior treatment-adherence gap.
+  - visual_field_obstruction_pct (number or null): a visual field test's percent
+    obstruction, if one is cited."""
 
 
 class IntakeExtractionError(RuntimeError):
@@ -111,6 +143,10 @@ def intake_agent(redacted_text: str, *, client: AzureOpenAI | None = None) -> di
     result = {name: data.get(name) for name in REQUIRED_FIELDS}
     for name in ARRAY_FIELDS:
         result[name] = data.get(name) or []
+    result["requested_units"] = data.get("requested_units")
+    result["good_cause_for_late_filing"] = bool(data.get("good_cause_for_late_filing"))
+    evidence = data.get("supporting_evidence") or {}
+    result["supporting_evidence"] = {key: evidence.get(key) for key in SUPPORTING_EVIDENCE_KEYS}
     return result
 
 

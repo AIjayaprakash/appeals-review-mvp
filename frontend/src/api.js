@@ -8,6 +8,12 @@ async function handle(response) {
   return response.json();
 }
 
+export function uploadCase(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return fetch("/intake/upload", { method: "POST", body: formData }).then(handle);
+}
+
 export function listCases(status) {
   const query = status ? `?status=${encodeURIComponent(status)}` : "";
   return fetch(`/cases${query}`).then(handle);

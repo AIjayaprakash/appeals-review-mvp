@@ -53,6 +53,9 @@ class GraphState(TypedDict, total=False):
     token_map: dict[str, str]
     resolved_member_id: str | None
     is_duplicate: bool
+    requested_units: int | None
+    good_cause_for_late_filing: bool
+    supporting_evidence: dict
     denial: dict | None
     eligibility: dict | None
     utilization: dict | None
@@ -112,6 +115,9 @@ def intake_node(state: GraphState) -> dict:
         "case": case,
         "redacted_clinical_text": redaction_result.redacted_text,
         "token_map": redaction_result.token_map,
+        "requested_units": fields.get("requested_units"),
+        "good_cause_for_late_filing": bool(fields.get("good_cause_for_late_filing")),
+        "supporting_evidence": fields.get("supporting_evidence") or {},
     }
 
 
@@ -137,11 +143,6 @@ def lookup_node(state: GraphState) -> dict:
     finally:
         conn.close()
 
-    # requested_units / supporting_evidence / good_cause_for_late_filing aren't
-    # produced by any node yet -- intake_agent doesn't extract them (see
-    # CLAUDE.md: "Agents never invent a missing field"). They default to
-    # "nothing submitted" rather than being guessed; closing this gap means
-    # extending intake_agent's schema in a future phase, together with its tests.
     facts = AppealFacts(
         member_id=resolved_member_id,
         member_name=case.member.name,
@@ -149,6 +150,9 @@ def lookup_node(state: GraphState) -> dict:
         case_reference=case.request.case_reference,
         denial_reference=case.request.denial_reference,
         date_received=state.get("received_date") or date.today(),
+        requested_units=state.get("requested_units"),
+        supporting_evidence=state.get("supporting_evidence") or {},
+        good_cause_for_late_filing=bool(state.get("good_cause_for_late_filing")),
     )
 
     return {

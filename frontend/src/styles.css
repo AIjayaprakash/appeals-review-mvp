@@ -97,6 +97,28 @@ body {
   color: #b3261e;
 }
 
+.upload-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.upload-card h3 {
+  margin-top: 0;
+}
+
+.upload-hint {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-top: 0;
+}
+
+.upload-status {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
 .case-summary-card {
   background: white;
   border-radius: 8px;

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.core.nodes import ARRAY_FIELDS, REQUIRED_FIELDS, intake_agent
+from app.core.nodes import ARRAY_FIELDS, OPTIONAL_FIELDS, REQUIRED_FIELDS, SUPPORTING_EVIDENCE_KEYS, intake_agent
 
 
 def _fake_response(payload: dict) -> MagicMock:
@@ -62,6 +62,9 @@ def test_intake_agent_fills_missing_fields_with_null_and_empty_lists():
     assert result["denial_reference"] is None
     for field in ARRAY_FIELDS:
         assert result[field] == []
+    assert result["requested_units"] is None
+    assert result["good_cause_for_late_filing"] is False
+    assert result["supporting_evidence"] == {key: None for key in SUPPORTING_EVIDENCE_KEYS}
 
 
 def test_intake_agent_never_fabricates_extra_fields_the_model_did_not_return():
@@ -73,7 +76,27 @@ def test_intake_agent_never_fabricates_extra_fields_the_model_did_not_return():
     result = intake_agent("some redacted text", client=client)
 
     assert "some_unexpected_field" not in result
-    assert set(result.keys()) == set(REQUIRED_FIELDS) | set(ARRAY_FIELDS)
+    assert set(result.keys()) == set(REQUIRED_FIELDS) | set(ARRAY_FIELDS) | set(OPTIONAL_FIELDS)
+
+
+def test_intake_agent_extracts_annual_limit_override_fields_when_stated():
+    client = MagicMock()
+    client.chat.completions.create.return_value = _fake_response(
+        {
+            "member_name": "Marcus T. Oyelaran",
+            "requested_units": 12,
+            "good_cause_for_late_filing": False,
+            "supporting_evidence": {"functional_outcome_measure": True, "bounded_goal_stated": False},
+        }
+    )
+
+    result = intake_agent("some redacted text", client=client)
+
+    assert result["requested_units"] == 12
+    assert result["good_cause_for_late_filing"] is False
+    assert result["supporting_evidence"]["functional_outcome_measure"] is True
+    assert result["supporting_evidence"]["bounded_goal_stated"] is False
+    assert result["supporting_evidence"]["visit_estimate_provided"] is None
 
 
 @pytest.mark.skipif(
