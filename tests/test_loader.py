@@ -4,9 +4,9 @@ from app.load_reference_data import load_all
 def test_load_all_returns_expected_counts(db_conn):
     counts = load_all(db_conn)
     assert counts == {
-        "denials": 4,
-        "eligibility_benefits": 4,
-        "utilization_history": 4,
+        "denials": 10,
+        "eligibility_benefits": 10,
+        "utilization_history": 10,
     }
 
 

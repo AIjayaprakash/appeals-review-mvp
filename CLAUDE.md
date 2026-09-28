@@ -62,6 +62,7 @@ reference_data/ test_data/ tests/ docs/
 ## Commands
 - `docker compose up -d` — Postgres + ChromaDB
 - `uv pip install -e '.[dev]'` — install
+- `python -m spacy download en_core_web_sm` — one-time, needed by Presidio for redaction (app/security/redaction.py)
 - `pytest -q` — run tests (must pass before finishing any task)
 - `uvicorn app.main:app --reload` — run API
 

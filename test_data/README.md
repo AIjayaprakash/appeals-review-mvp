@@ -51,3 +51,13 @@ expected_extraction.json                       ground-truth fields for every fil
 Same shape works for adding more scenarios later — a scanned/handwritten-notes
 case for OCR robustness, or a non-English intake email, are the two most useful
 additions once the pipeline handles these six cleanly.
+
+## EMAIL-004 (Phase 0.5 addition)
+
+`emails/EMAIL-004_duplicate_of_email_001.eml` is a near-identical follow-up to
+EMAIL-001, sent 3 days later by the same office, referencing the same
+`case_reference` (APL-2026-00312) and the same member. It backs Scenario 9
+(duplicate submission, merge) from `docs/scenarios-operational-plan.pdf` — see
+`reference_data/scenario_manifest.json` for the full scenario-to-data mapping across
+all ten outcomes, not just extraction. It is not in `expected_extraction.json`,
+which is scoped to the original six intake-extraction fixtures.

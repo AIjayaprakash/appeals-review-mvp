@@ -45,6 +45,10 @@ class Request(BaseModel):
     procedure: str | None = None
     cpt_code: str | None = None
     denial_reference: str | None = None
+    # The appeal's own tracking number (e.g. APL-2026-00312) -- distinct from
+    # denial_reference, and needed so a later duplicate submission can be matched
+    # against an already-open case (check 2 / Scenario 9).
+    case_reference: str | None = None
 
 
 class Document(BaseModel):

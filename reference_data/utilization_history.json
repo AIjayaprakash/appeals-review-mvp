@@ -39,6 +39,56 @@
       ],
       "units_used_ytd": { "physical_therapy_visits": 26 },
       "prior_appeals_on_file": 1
+    },
+    {
+      "member_id": "MBR-330456",
+      "history": [
+        { "date": "2026-01-15", "type": "claim", "service": "Physician-supervised weight-management program enrollment", "outcome": "paid" },
+        { "date": "2026-03-15", "type": "claim", "service": "Weight-management follow-up (month 2)", "outcome": "paid" },
+        { "date": "2026-07-20", "type": "prior_auth", "service": "Laparoscopic Roux-en-Y gastric bypass", "outcome": "denied — DEN-2026-20301" }
+      ],
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-118820",
+      "history": [
+        { "date": "2026-06-01", "type": "claim", "service": "Ophthalmology consult, upper eyelid dermatochalasis", "outcome": "paid" },
+        { "date": "2026-07-25", "type": "prior_auth", "service": "Bilateral upper blepharoplasty", "outcome": "denied — DEN-2026-20455" }
+      ],
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-772341",
+      "history": [
+        { "date": "2026-02-01", "type": "prior_auth", "service": "Outpatient PT, 20 visits (annual allowance), knee pain", "outcome": "approved" },
+        { "date": "2026-08-01", "type": "prior_auth", "service": "Outpatient PT, 15 additional visits", "outcome": "denied — DEN-2026-20588" }
+      ],
+      "units_used_ytd": { "physical_therapy_visits": 20 },
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-904433",
+      "history": [
+        { "date": "2026-05-20", "type": "claim", "service": "Premium payment lapse notice issued", "outcome": "n/a" },
+        { "date": "2026-07-02", "type": "claim", "service": "MRI, lower extremity", "outcome": "denied — DEN-2026-20690" },
+        { "date": "2026-08-01", "type": "claim", "service": "Coverage reinstated", "outcome": "n/a" }
+      ],
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-661209",
+      "history": [
+        { "date": "2025-11-02", "type": "prior_auth", "service": "Knee arthroscopy, partial meniscectomy", "outcome": "denied — DEN-2025-18220" }
+      ],
+      "prior_appeals_on_file": 0
+    },
+    {
+      "member_id": "MBR-556012",
+      "history": [
+        { "date": "2026-03-15", "type": "prior_auth", "service": "Lumbar spine decompression surgery", "outcome": "denied — DEN-2026-17750", "denial_reference": "DEN-2026-17750" },
+        { "date": "2026-07-10", "type": "appeal", "service": "Internal appeal of DEN-2026-17750 (lumbar spine decompression surgery)", "outcome": "upheld", "denial_reference": "DEN-2026-17750" }
+      ],
+      "prior_appeals_on_file": 1
     }
   ]
 }

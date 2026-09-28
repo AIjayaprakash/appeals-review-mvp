@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.cases import router as cases_router
+from app.api.intake import router as intake_router
 from app.db import get_connection, init_db
 
 
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Appeals & Grievances Review Copilot", lifespan=lifespan)
 app.include_router(cases_router)
+app.include_router(intake_router)
 
 
 @app.get("/health")

@@ -71,6 +71,112 @@
         "unit": "visits"
       },
       "resolution_note": "member_id, DOB, and plan are entirely absent from the source email (EMAIL-002) — it only names a caregiver, a first name, and 'my stepdad's work plan'. This record cannot be resolved from the email alone; it is included to show what the agent *should* find once a member_id is supplied, not what it can find today. This case should route to Needs Clarification, not attempt a fuzzy match on 'Marion' + hip surgery alone."
+    },
+    {
+      "member_id": "MBR-330456",
+      "member_name": "Robert Yeung",
+      "date_of_birth": "1979-05-22",
+      "plan_name": "Empire Advantage PPO",
+      "plan_status": "active",
+      "effective_date": "2023-01-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Bariatric surgery",
+        "requires_prior_auth": true,
+        "step_therapy_required": "6-month physician-supervised weight-management program within the prior 2 years; BMI ≥40, or ≥35 with a qualifying comorbidity",
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
+    },
+    {
+      "member_id": "MBR-118820",
+      "member_name": "Priya Anand",
+      "date_of_birth": "1985-11-09",
+      "plan_name": "Empire Advantage HMO",
+      "plan_status": "active",
+      "effective_date": "2022-09-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Eyelid surgery (blepharoplasty)",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "coverage_exclusion": "Cosmetic exclusion unless a visual field test demonstrates ≥30% obstruction",
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
+    },
+    {
+      "member_id": "MBR-772341",
+      "member_name": "David Okafor",
+      "date_of_birth": "1972-02-14",
+      "plan_name": "Hartwell Community EPO",
+      "plan_status": "active",
+      "effective_date": "2021-03-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Outpatient physical therapy",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "annual_limit": 20,
+        "units_used_ytd": 20,
+        "unit": "visits"
+      }
+    },
+    {
+      "member_id": "MBR-904433",
+      "member_name": "Helena Brooks",
+      "date_of_birth": "1963-08-30",
+      "plan_name": "Lakeside Regional PPO",
+      "plan_status": "active",
+      "effective_date": "2020-05-01",
+      "requesting_provider_network_status": "in-network",
+      "coverage_gaps": [
+        { "start_date": "2026-06-15", "end_date": "2026-07-31", "reason": "non-payment" }
+      ],
+      "relevant_benefit": {
+        "category": "Diagnostic imaging (MRI)",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
+    },
+    {
+      "member_id": "MBR-661209",
+      "member_name": "Thomas Reyes",
+      "date_of_birth": "1968-12-05",
+      "plan_name": "Empire Advantage PPO",
+      "plan_status": "active",
+      "effective_date": "2019-01-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Orthopedic surgery",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
+    },
+    {
+      "member_id": "MBR-556012",
+      "member_name": "Angela Ruiz",
+      "date_of_birth": "1975-06-18",
+      "plan_name": "Hartwell Community EPO",
+      "plan_status": "active",
+      "effective_date": "2020-02-01",
+      "requesting_provider_network_status": "in-network",
+      "relevant_benefit": {
+        "category": "Spinal surgery",
+        "requires_prior_auth": true,
+        "step_therapy_required": null,
+        "annual_limit": null,
+        "units_used_ytd": null,
+        "unit": null
+      }
     }
   ]
 }

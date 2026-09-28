@@ -50,6 +50,79 @@
       "reviewer_notes": "Member has used 26 of 30 annual PT visit allowance; extension requires a functional-necessity override per CP-PT-002 section 3.",
       "appeal_window_days": 180,
       "appeal_deadline": "2027-02-14"
+    },
+    {
+      "denial_reference": "DEN-2026-20301",
+      "case_reference": "APL-2026-00591",
+      "member_id": "MBR-330456",
+      "date_denied": "2026-07-20",
+      "denied_service": { "cpt_code": "43644", "description": "Laparoscopic Roux-en-Y gastric bypass (bariatric surgery)" },
+      "stated_reason": "BMI and physician-supervised weight-management documentation do not meet plan medical necessity criteria for bariatric surgery.",
+      "cited_policy_id": "CP-BARI-021",
+      "reviewer_notes": "Records show BMI 34 (below the required ≥40, or ≥35 with a qualifying comorbidity) with no comorbidity documented, and only 2 of the required 6 months of physician-supervised weight-management program participation within the past 2 years.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-01-16"
+    },
+    {
+      "denial_reference": "DEN-2026-20455",
+      "case_reference": "APL-2026-00602",
+      "member_id": "MBR-118820",
+      "date_denied": "2026-07-25",
+      "denied_service": { "cpt_code": "15822", "description": "Blepharoplasty, upper eyelid (bilateral)" },
+      "stated_reason": "Requested procedure is excluded as cosmetic; plan requires a visual field test confirming ≥30% obstruction for the reconstructive exception, which was not submitted.",
+      "cited_policy_id": "CP-OPHTH-005",
+      "reviewer_notes": "No visual field test of any kind is included in the submitted records. CP-OPHTH-005 requires a formal test demonstrating ≥30% visual field obstruction to qualify eyelid surgery as reconstructive rather than cosmetic.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-01-21"
+    },
+    {
+      "denial_reference": "DEN-2026-20588",
+      "case_reference": "APL-2026-00614",
+      "member_id": "MBR-772341",
+      "date_denied": "2026-08-01",
+      "denied_service": { "cpt_code": "97110", "description": "Outpatient physical therapy — 15 additional visits (knee pain)" },
+      "stated_reason": "Requested visits would exceed the annual physical therapy allowance; no override documentation submitted.",
+      "cited_policy_id": "CP-PT-002",
+      "reviewer_notes": "Member has used all 20 of 20 annual PT visits. The appeal states only that ‘the patient is still in pain’ — no functional outcome score, no bounded goal, and no estimated visit count, all of which CP-PT-002 Section 3 requires for an annual-limit exception.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-01-28"
+    },
+    {
+      "denial_reference": "DEN-2026-20690",
+      "case_reference": "APL-2026-00629",
+      "member_id": "MBR-904433",
+      "date_denied": "2026-07-10",
+      "date_of_service": "2026-07-02",
+      "denied_service": { "cpt_code": "73721", "description": "MRI, lower extremity, without contrast" },
+      "stated_reason": "Member coverage was not active on the date of service.",
+      "cited_policy_id": null,
+      "reviewer_notes": "Enrollment record shows coverage lapsed 2026-06-15 and was not reinstated until 2026-08-01. The date of service (2026-07-02) falls within that gap; this is an eligibility issue, not a clinical one.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2027-01-06"
+    },
+    {
+      "denial_reference": "DEN-2025-18220",
+      "case_reference": "APL-2025-00287",
+      "member_id": "MBR-661209",
+      "date_denied": "2025-11-02",
+      "denied_service": { "cpt_code": "29881", "description": "Knee arthroscopy, partial meniscectomy" },
+      "stated_reason": "Insufficient documentation of medical necessity for knee arthroscopy at time of original review.",
+      "cited_policy_id": null,
+      "reviewer_notes": "Appeal was received 2026-07-14, 74 days after the 2026-05-01 appeal deadline (180 days from the 2025-11-02 denial). No good-cause explanation for the delay was provided; the clinical merits were never reached.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2026-05-01"
+    },
+    {
+      "denial_reference": "DEN-2026-17750",
+      "case_reference": "APL-2026-00195",
+      "member_id": "MBR-556012",
+      "date_denied": "2026-03-15",
+      "denied_service": { "cpt_code": "63030", "description": "Lumbar spine decompression surgery (laminotomy/discectomy)" },
+      "stated_reason": "Documentation did not establish medical necessity per plan clinical policy at time of original review.",
+      "cited_policy_id": null,
+      "reviewer_notes": "First internal appeal on this denial was reviewed and upheld on 2026-07-10 (see utilization_history). A second submission disputing the same denial arrived 2026-08-25, repeating largely the same argument as the first appeal.",
+      "appeal_window_days": 180,
+      "appeal_deadline": "2026-09-11"
     }
   ]
 }

@@ -69,3 +69,22 @@ matching clinical policy — the four sources discussed as primary. It does **no
 include provider network/credentialing data or ICD-10↔CPT necessity cross-reference
 tables, which were named as lower-tier sources; add those the same way (structured,
 keyed by provider NPI or code pair) if a case in development actually needs them.
+
+## `scenario_manifest.json`
+
+Added in Phase 0.5 to back all ten outcome scenarios from
+`docs/scenarios-operational-plan.pdf`, not just the three (1, 7, 8) the original
+intake test files covered. Denial, eligibility, and utilization records now exist for
+Robert Yeung (2), Priya Anand (3), David Okafor (4), Helena Brooks (5), Thomas Reyes
+(6), and Angela Ruiz (10), plus two new policy bulletins (`CP-BARI-021`,
+`CP-OPHTH-005`) for the two new clinically-evaluated cases. `scenario_manifest.json`
+maps each scenario to its expected outcome, which check should be conclusive, and the
+member_id / denial_reference to look up — this is the ground truth the Phase 1
+rules-engine tests are written against, the same way `evaluation_manifest.json` backs
+the Evaluation Agent.
+
+Two fields appear only on the records that need them, following the existing pattern
+of scenario-specific extra keys (e.g. `member_lookup_hint`, `formulary_tier`):
+`denials.date_of_service` (Brooks, scenario 5) and `denials.appeal_received_date`
+(Reyes, scenario 6). `eligibility_benefits.coverage_gaps` (Brooks) and
+`eligibility_benefits.coverage_exclusion` (Anand) are similarly scenario-specific.
